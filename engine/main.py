@@ -1,4 +1,8 @@
+"""
+This file holds all the classes needed to run the chess engine 
+"""
 
+from dataclasses import dataclass
 
 class Piece():
     Empty = 0
@@ -30,6 +34,12 @@ class Piece():
         if Piece.piece_color(p) == Piece.White:
             p_str = p_str.upper()
         return p_str
+
+
+@dataclass
+class Move:
+    start:int = 0
+    target:int = 0
 
 
 class Board():
@@ -92,13 +102,14 @@ class Board():
             print(Piece.piece_to_char(p),end="")
             if i%8==7:
                 print()
-        
-        
         turn = "w" if self.is_white_turn else "b"
-
         print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}")
 
 
+
+class pre_computed_data():
+    knight_moves = []
+    straight_moves = []
 
 
 b = Board()
