@@ -25,7 +25,7 @@ class Piece():
         return color | p_type
 
     def piece_to_char(p:int):
-        type_to_char_dict = {Piece.King:"k", Piece.Pawn:"p", Piece.Knight:"n", Piece.Bishop:"b", Piece.Rook:"r", Piece.Queen:"q", Piece.Empty:" "}
+        type_to_char_dict = {Piece.King:"k", Piece.Pawn:"p", Piece.Knight:"n", Piece.Bishop:"b", Piece.Rook:"r", Piece.Queen:"q", Piece.Empty:"."}
         p_str = type_to_char_dict[Piece.piece_type(p)]
         if Piece.piece_color(p) == Piece.White:
             p_str = p_str.upper()
@@ -64,6 +64,16 @@ class Board():
             self.ep_square = -1
         else:
             self.ep_square = self.cord_to_index(ep_square)
+
+        if turn == "w":
+            self.is_white_turn = 1
+        else:
+            self.is_white_turn = 0
+
+        self.castle_rights = 0
+        str_to_castle_dict = {"-":0, "K":8, "Q":4, "k":2, "q":1}
+        for c in castle:
+            self.castle_rights = self.castle_rights | str_to_castle_dict[c]
         
         self.squares = [0 for _ in range(64)]
         lines = state.split("/")
@@ -75,12 +85,18 @@ class Board():
                 else:
                     self.set_piece(Piece.char_to_piece(c), j*8+k)
                     k+= 1
+        
     
     def print(self):
         for i,p in enumerate(self.squares):
             print(Piece.piece_to_char(p),end="")
             if i%8==7:
                 print()
+        
+        
+        turn = "w" if self.is_white_turn else "b"
+
+        print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}")
 
 
 
