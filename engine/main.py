@@ -4,7 +4,7 @@ This file holds all the classes needed to run the chess engine
 from dataclasses import dataclass
 
 
-
+@dataclass
 class Piece():
     Empty = 0
     King = 1
@@ -45,6 +45,9 @@ class Piece():
 class Move:
     start:int = 0
     target:int = 0
+
+    
+
 
 
 
@@ -116,7 +119,7 @@ class Board():
         turn = "w" if self.is_white_turn else "b"
         print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}, ep_sqr:{self.ep_square}")
     
-    
+
     def print_squares(sqrs):
         for i in range(64):
             if i in sqrs:
