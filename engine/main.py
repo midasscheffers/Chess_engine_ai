@@ -121,10 +121,23 @@ class Board():
 
 
 
+
 class pre_computed_data():
-    knight_moves = []
+    knight_moves = [-17, -15, -10, -6, 6, 10, 15, 17]
+    knight_moves_on_sq = []
+    for sq in range(64):
+        p = sq
+        possible_moves = [p+m for m in knight_moves]
+        for m in possible_moves:
+            if m > 63 or m< 0:
+                possible_moves.remove(m)
+        knight_moves_on_sq.append(possible_moves)
+
     straight_moves = []
 
 
 b = Board()
+pre_data = pre_computed_data()
 b.print()
+
+pre_data.knight_moves_on_sq[0]
