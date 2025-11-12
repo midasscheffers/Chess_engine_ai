@@ -109,6 +109,15 @@ class Board():
                 print()
         turn = "w" if self.is_white_turn else "b"
         print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}, ep_sqr:{self.ep_square}")
+    
+    def print_squares(sqrs):
+        for i in range(64):
+            if i in sqrs:
+                print("X",end="")
+            else:
+                print(".",end="")
+            if i%8==7:
+                print()
 
 
     def make_move(self, m:Move):
@@ -120,16 +129,31 @@ class Board():
             self.captured_material.append(p_end)
 
 
+def is_wrapped(sq, offset):
+    """
+    We do the following to determin if a move stays on the board and is not wrapped.
+        1. convert sq to x,y
+        2. convert offset to x',y'
+        3. determin if x+x', y+y' on the board
+    (Works only on offset within 3 spaces of original tile)
+    """
+    
+    x_0,y_0 = sq%8, sq//8
 
+    x_1,y_1 = ((offset+3)%8)-3, (offset+3)//8
+    x_2,y_2 = x_0+x_1, y_0+y_1
+    if x_2<0 or x_2 > 7 or y_2<0 or y_2 > 7:
+        return True
+    return False
 
 class pre_computed_data():
     knight_moves = [-17, -15, -10, -6, 6, 10, 15, 17]
     knight_moves_on_sq = []
     for sq in range(64):
-        possible_moves = [sq+m for m in knight_moves]
-        for m in possible_moves:
-            if m > 63 or m< 0:
-                possible_moves.remove(m)
+        possible_moves = []
+        for km in knight_moves:
+            if not is_wrapped(sq, km):
+                possible_moves.append(sq+km)
         knight_moves_on_sq.append(possible_moves)
 
     straight_moves = []
@@ -137,6 +161,8 @@ class pre_computed_data():
 
 b = Board()
 pre_data = pre_computed_data()
-b.print()
-
-pre_data.knight_moves_on_sq[0]
+# b.print()
+moves = pre_data.knight_moves_on_sq[32]
+print(moves)
+Board.print_squares(moves)
+print(is_wrapped(32, -17))
