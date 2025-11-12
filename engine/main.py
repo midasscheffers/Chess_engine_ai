@@ -51,6 +51,7 @@ class Board():
         self.halfmoves = 0
         self.ep_square = -1
         self.is_white_turn = 1
+        self.captured_material = []
         self.load_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
 
@@ -59,11 +60,15 @@ class Board():
 
 
     def index_to_cord(i:int):
-        pass
+        x = i%8
+        y = 8-(i//8)
+        return str(chr(x+97))+str(y)
 
 
     def cord_to_index(cord:str):
-        pass
+        x,y = ord(cord[0])-97, int(cord[1])-1
+        return x+(56-y*8)
+
     
 
     def load_FEN(self, FEN:str):
@@ -106,6 +111,15 @@ class Board():
         print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}")
 
 
+    def make_move(self, m:Move):
+        p_start = self.squares[m.start]
+        p_end = self.squares[m.target]
+        self.squares[m.start] = Piece.Empty
+        self.squares[m.target] = p_start
+        if Piece.piece_type(p_end) == Piece.Empty:
+            self.captured_material.append(p_end)
+
+
 
 class pre_computed_data():
     knight_moves = []
@@ -113,5 +127,4 @@ class pre_computed_data():
 
 
 b = Board()
-# print(b.squares)
 b.print()
