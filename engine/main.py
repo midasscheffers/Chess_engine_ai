@@ -108,7 +108,7 @@ class Board():
             if i%8==7:
                 print()
         turn = "w" if self.is_white_turn else "b"
-        print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}")
+        print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}, ep_sqr:{self.ep_square}")
 
 
     def make_move(self, m:Move):
