@@ -1,8 +1,9 @@
 """
 This file holds all the classes needed to run the chess engine 
 """
-
 from dataclasses import dataclass
+
+
 
 class Piece():
     Empty = 0
@@ -19,14 +20,17 @@ class Piece():
     def piece_color(p):
         return 24 & p
     
+
     def piece_type(p):
         return 7 & p
+
 
     def char_to_piece(p:str):
         color = Piece.White if p.isupper() else Piece.Black
         char_to_type_dict = {"k":Piece.King, "p": Piece.Pawn, "n":Piece.Knight, "b":Piece.Bishop, "r":Piece.Rook, "q":Piece.Queen}
         p_type = char_to_type_dict[p.lower()]
         return color | p_type
+
 
     def piece_to_char(p:int):
         type_to_char_dict = {Piece.King:"k", Piece.Pawn:"p", Piece.Knight:"n", Piece.Bishop:"b", Piece.Rook:"r", Piece.Queen:"q", Piece.Empty:"."}
@@ -36,10 +40,12 @@ class Piece():
         return p_str
 
 
+
 @dataclass
 class Move:
     start:int = 0
     target:int = 0
+
 
 
 class Board():
@@ -52,6 +58,7 @@ class Board():
         self.ep_square = -1
         self.is_white_turn = 1
         self.captured_material = []
+        self.pre_computed = pre_computed_data()
         self.load_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
 
@@ -69,7 +76,6 @@ class Board():
         x,y = ord(cord[0])-97, int(cord[1])-1
         return x+(56-y*8)
 
-    
 
     def load_FEN(self, FEN:str):
         state, turn, castle, ep_square, halfmoves, moves = FEN.split(" ")
@@ -110,6 +116,7 @@ class Board():
         turn = "w" if self.is_white_turn else "b"
         print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}, ep_sqr:{self.ep_square}")
     
+    
     def print_squares(sqrs):
         for i in range(64):
             if i in sqrs:
@@ -127,6 +134,22 @@ class Board():
         self.squares[m.target] = p_start
         if Piece.piece_type(p_end) == Piece.Empty:
             self.captured_material.append(p_end)
+    
+
+    def get_moves(self):
+        moves = []
+        for sq, p in enumerate(self.squares):
+            this_type = Piece.piece_type(p)
+            this_color = Piece.piece_color(p)
+            if not this_color == (Piece.White if self.is_white_turn else Piece.Black):
+                continue
+            match this_type:
+                case Piece.Knight:
+                    for m in self.pre_computed.knight_moves_on_sq[sq]:
+                        if not Piece.piece_color(self.squares[m]) == this_color:
+                            moves.append(Move(sq, m))
+        return moves
+                    
 
 
 def is_wrapped(sq, offset):
@@ -146,6 +169,8 @@ def is_wrapped(sq, offset):
         return True
     return False
 
+
+
 class pre_computed_data():
     knight_moves = [-17, -15, -10, -6, 6, 10, 15, 17]
     knight_moves_on_sq = []
@@ -159,10 +184,9 @@ class pre_computed_data():
     straight_moves = []
 
 
+
+
 b = Board()
-pre_data = pre_computed_data()
-# b.print()
-moves = pre_data.knight_moves_on_sq[32]
-print(moves)
-Board.print_squares(moves)
-print(is_wrapped(32, -17))
+b.print()
+print(b.get_moves())
+
