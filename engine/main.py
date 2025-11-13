@@ -155,41 +155,48 @@ class Board():
                     
 
 
-def is_wrapped(sq, offset):
-    """
-    We do the following to determin if a move stays on the board and is not wrapped.
-        1. convert sq to x,y
-        2. convert offset to x',y'
-        3. determin if x+x', y+y' on the board
-    (Works only on offset within 3 spaces of original tile)
-    """
-    
-    x_0,y_0 = sq%8, sq//8
-
-    x_1,y_1 = ((offset+3)%8)-3, (offset+3)//8
-    x_2,y_2 = x_0+x_1, y_0+y_1
-    if x_2<0 or x_2 > 7 or y_2<0 or y_2 > 7:
-        return True
-    return False
+def on_board(x,y):
+    if x<0 or x>7 or y<0 or y>7:
+        return False
+    return True
 
 
 
 class pre_computed_data():
-    knight_moves = [-17, -15, -10, -6, 6, 10, 15, 17]
+    knight_moves = [(-1,-2), (1, -2), (-2, -1), (2, -1), (-2, 1), (2,1), (-1, 2), (1, 2)]
     knight_moves_on_sq = []
     for sq in range(64):
+        x,y = sq%8, sq//8
         possible_moves = []
         for km in knight_moves:
-            if not is_wrapped(sq, km):
-                possible_moves.append(sq+km)
+            target_x, target_y = x+km[0], y+km[1]
+            if on_board(target_x, target_y):
+                target_sq = target_x + 8*target_y
+                possible_moves.append(target_sq)
         knight_moves_on_sq.append(possible_moves)
 
-    straight_moves = []
+    directions = [(-1,-1), (0,-1), (1,-1), (-1,0), (1,0), (-1, 1), (0, 1), (1,1)]
+    sliding_moves_on_sq = []
+    for sq in range(64):
+        sliding_moves_on_sq.append({})
+        x,y = sq%8, sq//8
+        for d in directions:
+            depth = 1
+            target_x, target_y = x+d[0]*depth, y+d[1]*depth
+            while on_board(target_x, target_y):
+                target_sq = target_x + 8*target_y
+                sliding_moves_on_sq[sq][d] = target_sq
+                depth += 1
+                target_x, target_y = x+d[0]*depth, y+d[1]*depth
+
+
 
 
 
 
 b = Board()
+b.is_white_turn = 0
 b.print()
+
 print(b.get_moves())
 
