@@ -46,6 +46,12 @@ class Move:
     start:int = 0
     target:int = 0
 
+    flag = 0
+    is_capture = 1
+    is_check = 2
+    is_castle = 4
+    is_promotion = 8
+
     
 
 
@@ -216,4 +222,3 @@ class pre_computed_data():
 b = Board()
 b.print()
 print(b.get_moves())
-
