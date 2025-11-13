@@ -62,7 +62,7 @@ class Board():
         self.is_white_turn = 1
         self.captured_material = []
         self.pre_computed = pre_computed_data()
-        self.load_FEN("rnbqkbnr/1ppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.load_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
 
     def set_piece(self, p:Piece, sqr:int):
@@ -213,8 +213,6 @@ class pre_computed_data():
 
 
 b = Board()
-b.is_white_turn = 0
 b.print()
-print(b.pre_computed.sliding_moves_on_sq[9])
 print(b.get_moves())
 
