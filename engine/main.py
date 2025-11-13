@@ -62,7 +62,7 @@ class Board():
         self.is_white_turn = 1
         self.captured_material = []
         self.pre_computed = pre_computed_data()
-        self.load_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        self.load_FEN("rnbqkbnr/1ppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
 
     def set_piece(self, p:Piece, sqr:int):
@@ -87,7 +87,7 @@ class Board():
         if ep_square == "-":
             self.ep_square = -1
         else:
-            self.ep_square = self.cord_to_index(ep_square)
+            self.ep_square = Board.cord_to_index(ep_square)
 
         if turn == "w":
             self.is_white_turn = 1
@@ -151,6 +151,22 @@ class Board():
                     for m in self.pre_computed.knight_moves_on_sq[sq]:
                         if not Piece.piece_color(self.squares[m]) == this_color:
                             moves.append(Move(sq, m))
+                case w if w in [Piece.Bishop, Piece.Rook, Piece.Queen]:
+                    for d in self.pre_computed.sliding_moves_on_sq[sq]:
+                        if this_type == Piece.Bishop:
+                            if (d[0]+d[1])%2 == 1:
+                                continue
+                        elif this_type == Piece.Rook:
+                            if (d[0]+d[1])%2 == 0:
+                                continue
+                        for sm in self.pre_computed.sliding_moves_on_sq[sq][d]:
+                            if Piece.piece_color(self.squares[sm]) == 0:
+                                moves.append(Move(sq, sm))
+                            elif Piece.piece_color(self.squares[sm]) == this_color:
+                                break
+                            else:
+                                moves.append(Move(sq, sm))
+                                break
         return moves
                     
 
@@ -185,7 +201,9 @@ class pre_computed_data():
             target_x, target_y = x+d[0]*depth, y+d[1]*depth
             while on_board(target_x, target_y):
                 target_sq = target_x + 8*target_y
-                sliding_moves_on_sq[sq][d] = target_sq
+                if d not in sliding_moves_on_sq[sq].keys():
+                    sliding_moves_on_sq[sq][d] = []
+                sliding_moves_on_sq[sq][d].append(target_sq)
                 depth += 1
                 target_x, target_y = x+d[0]*depth, y+d[1]*depth
 
@@ -197,6 +215,6 @@ class pre_computed_data():
 b = Board()
 b.is_white_turn = 0
 b.print()
-
+print(b.pre_computed.sliding_moves_on_sq[9])
 print(b.get_moves())
 
