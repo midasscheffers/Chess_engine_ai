@@ -146,27 +146,28 @@ class Board():
             this_color = Piece.piece_color(p)
             if not this_color == (Piece.White if self.is_white_turn else Piece.Black):
                 continue
-            match this_type:
-                case Piece.Knight:
-                    for m in self.pre_computed.knight_moves_on_sq[sq]:
-                        if not Piece.piece_color(self.squares[m]) == this_color:
-                            moves.append(Move(sq, m))
-                case w if w in [Piece.Bishop, Piece.Rook, Piece.Queen]:
-                    for d in self.pre_computed.sliding_moves_on_sq[sq]:
-                        if this_type == Piece.Bishop:
-                            if (d[0]+d[1])%2 == 1:
-                                continue
-                        elif this_type == Piece.Rook:
-                            if (d[0]+d[1])%2 == 0:
-                                continue
-                        for sm in self.pre_computed.sliding_moves_on_sq[sq][d]:
-                            if Piece.piece_color(self.squares[sm]) == 0:
-                                moves.append(Move(sq, sm))
-                            elif Piece.piece_color(self.squares[sm]) == this_color:
-                                break
-                            else:
-                                moves.append(Move(sq, sm))
-                                break
+
+            # run for different pieces the code
+            if this_type == Piece.Knight:
+                for m in self.pre_computed.knight_moves_on_sq[sq]:
+                    if not Piece.piece_color(self.squares[m]) == this_color:
+                        moves.append(Move(sq, m))
+            elif this_type in [Piece.Bishop, Piece.Rook, Piece.Queen]:
+                for d in self.pre_computed.sliding_moves_on_sq[sq]:
+                    if this_type == Piece.Bishop:
+                        if (d[0]+d[1])%2 == 1:
+                            continue
+                    elif this_type == Piece.Rook:
+                        if (d[0]+d[1])%2 == 0:
+                            continue
+                    for sm in self.pre_computed.sliding_moves_on_sq[sq][d]:
+                        if Piece.piece_color(self.squares[sm]) == 0:
+                            moves.append(Move(sq, sm))
+                        elif Piece.piece_color(self.squares[sm]) == this_color:
+                            break
+                        else:
+                            moves.append(Move(sq, sm))
+                            break
         return moves
                     
 
