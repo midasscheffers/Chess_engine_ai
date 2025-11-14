@@ -68,6 +68,7 @@ while running:
             mx,my = mx//(size), my//(size)
             if (mx+8*my) in highlight_sqrs:
                 b.make_move(Move(hover_piece[1]+hover_piece[2]*8, mx+8*my))
+                b.is_white_turn = not b.is_white_turn
             hover_piece = []
             highlight_sqrs = []
 
