@@ -20,6 +20,8 @@ running = True
 
 dark = (0,50, 100)
 light = (240, 230,200)
+hi_dark = (100,50,0)
+hi_light = (240, 50,50)
 
 # load board
 b = Board()
@@ -32,6 +34,7 @@ for p in ["king", "queen", "rook", "bishop", "knight", "pawn"]:
         piece_imgs[f"{c}_{p}"]  = img
 
 hover_piece = []
+highlight_sqrs = []
 
 
 
@@ -55,16 +58,28 @@ while running:
             mx,my = pygame.mouse.get_pos()
             mx,my = mx//(size), my//(size)
             hover_piece = [b.squares[mx+my*8], mx, my]
+            moves = b.get_moves()
+            for m in moves:
+                if m.start == mx+8*my:
+                    highlight_sqrs.append(m.target)
         
         if event.type == pygame.MOUSEBUTTONUP:
+            mx,my = pygame.mouse.get_pos()
+            mx,my = mx//(size), my//(size)
+            if (mx+8*my) in highlight_sqrs:
+                b.make_move(Move(hover_piece[1]+hover_piece[2]*8, mx+8*my))
             hover_piece = []
+            highlight_sqrs = []
 
     screen.fill("black")
 
     for sq in range(64):
         x,y = sq%8,sq//8
         # draw square
-        color = light if (x+y)%2==0 else dark
+        if sq in highlight_sqrs:
+            color = hi_light if (x+y)%2==0 else hi_dark
+        else:
+            color = light if (x+y)%2==0 else dark
         pygame.draw.rect(screen, color, [x*size, y*size, size, size])
         # draw piece
         if not Piece.piece_type(b.squares[sq]) == Piece.Empty:
