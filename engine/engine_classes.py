@@ -46,13 +46,13 @@ class Move:
     start:int = 0
     target:int = 0
     flag:int = 0
+    captured_piece:int = 0
 
     is_capture = 1
-    is_check = 2
-    is_castle = 4
-    is_promotion = 8
-    is_double_pawn_move = 16
-    is_ep = 32
+    is_castle = 2
+    is_promotion = 4
+    is_double_pawn_move = 8
+    is_ep = 16
 
     
 
@@ -69,6 +69,7 @@ class Board():
         self.ep_square = -1
         self.is_white_turn = 1
         self.captured_material = []
+        self.moves_made = []
         self.pre_computed = pre_computed_data()
         self.load_FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
@@ -92,6 +93,7 @@ class Board():
 
     def load_FEN(self, FEN:str):
         state, turn, castle, ep_square, halfmoves, moves = FEN.split(" ")
+        self.moves_made = []
         self.halfmoves = int(halfmoves)
         self.moves = int(moves)
         if ep_square == "-":
@@ -141,9 +143,12 @@ class Board():
 
 
     def make_move(self, m:Move):
+        self.moves_made.append(m)
         p_start = self.squares[m.start]
         p_end = self.squares[m.target]
         self.squares[m.start] = Piece.Empty
+        if m.flag & Move.is_capture:
+            self.captured_material.append(m.captured_piece)
         if m.flag & Move.is_double_pawn_move:
             self.ep_square = (m.start+m.target)//2
         else:
@@ -154,8 +159,6 @@ class Board():
             self.squares[m.target] = Piece.piece_color(p_start) | Piece.Queen
         else:
             self.squares[m.target] = p_start
-        if Piece.piece_type(p_end) == Piece.Empty:
-            self.captured_material.append(p_end)
     
 
     def get_moves(self):
@@ -216,11 +219,19 @@ class Board():
                 if Board.xy_to_index(x+1, y+d) == self.ep_square:
                     m = Move(sq, Board.xy_to_index(x+1, y+d))
                     m.flag |= Move.is_ep
+                    m.flag |= Move.is_capture
+                    m.captured_piece = enem_color | Piece.Pawn
                     moves.append(m)
                 if Board.xy_to_index(x-1, y+d) == self.ep_square:
                     m = Move(sq, Board.xy_to_index(x-1, y+d))
                     m.flag |= Move.is_ep
+                    m.flag |= Move.is_capture
+                    m.captured_piece = enem_color | Piece.Pawn
                     moves.append(m)
+        for m in moves:
+            if not self.squares[m.target] == Piece.Empty:
+                m.flag |= Move.is_capture
+                m.captured_piece = self.squares[m.target]
                 
 
 
@@ -266,9 +277,3 @@ class pre_computed_data():
 
 
 
-
-
-
-b = Board()
-b.print()
-print(b.get_moves())

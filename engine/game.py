@@ -5,7 +5,7 @@ This is the game file responsible for game drawing and such
 
 
 import pygame
-from main import *
+from engine_classes import *
 
 
 
