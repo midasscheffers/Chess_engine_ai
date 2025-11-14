@@ -56,17 +56,21 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_u:
+                b.unmake_move()
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
             mx,my = pygame.mouse.get_pos()
             mx,my = mx//(size), my//(size)
             hover_piece = [b.squares[mx+my*8], mx, my]
-            moves = b.get_moves()
+            moves = b.get_pseudo_moves()
             for m in moves:
                 if m.start == mx+8*my:
                     highlight_sqrs.append(m.target)
                     highlight_moves.append(m)
         
-        if event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == pygame.MOUSEBUTTONUP:
             mx,my = pygame.mouse.get_pos()
             mx,my = mx//(size), my//(size)
             if (mx+8*my) in highlight_sqrs:

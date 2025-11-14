@@ -161,7 +161,40 @@ class Board():
             self.squares[m.target] = p_start
     
 
+    def unmake_move(self):
+        if not len(self.moves_made):
+            return
+        m = self.moves_made.pop()
+        self.is_white_turn = not self.is_white_turn
+        self.squares[m.start] = self.squares[m.target]
+        if m.flag & Move.is_capture and not m.flag & Move.is_ep:
+            self.squares[m.target] = m.captured_piece
+        else:
+            self.squares[m.target] = Piece.Empty
+        
+
+    def in_check(self):
+        self.is_white_turn = not self.is_white_turn
+        enem_move = self.get_pseudo_moves()
+        self.is_white_turn = not self.is_white_turn
+        for m in enem_move:
+            if self.get_sq_king() == m.target:
+                return True
+        return False
+
+
     def get_moves(self):
+        moves = self.get_pseudo_moves()
+        final = []
+        for m in moves:
+            self.make_move(m)
+            if not self.in_check():
+                final.append(m)
+            self.unmake_move()
+        return final
+
+
+    def get_pseudo_moves(self):
         moves = []
         for sq, p in enumerate(self.squares):
             this_type = Piece.piece_type(p)
@@ -228,6 +261,14 @@ class Board():
                     m.flag |= Move.is_capture
                     m.captured_piece = enem_color | Piece.Pawn
                     moves.append(m)
+            elif this_type == Piece.King:
+                for d in self.pre_computed.sliding_moves_on_sq[sq]:
+                    sm = self.pre_computed.sliding_moves_on_sq[sq][d][0]
+                    if not Piece.piece_color(self.squares[sm]) == this_color:
+                        moves.append(Move(sq, sm))
+                # add castle moves
+
+
         for m in moves:
             if not self.squares[m.target] == Piece.Empty:
                 m.flag |= Move.is_capture
