@@ -66,7 +66,7 @@ class Board():
         self.castle_rights = 15
         self.moves = 1
         self.halfmoves = 0
-        self.ep_square = -1
+        self.ep_square = [-1]
         self.is_white_turn = 1
         self.captured_material = []
         self.moves_made = []
@@ -97,9 +97,9 @@ class Board():
         self.halfmoves = int(halfmoves)
         self.moves = int(moves)
         if ep_square == "-":
-            self.ep_square = -1
+            self.ep_square = [-1]
         else:
-            self.ep_square = Board.cord_to_index(ep_square)
+            self.ep_square = [Board.cord_to_index(ep_square)]
 
         if turn == "w":
             self.is_white_turn = 1
@@ -145,14 +145,15 @@ class Board():
     def make_move(self, m:Move):
         self.moves_made.append(m)
         p_start = self.squares[m.start]
+        self.is_white_turn = not self.is_white_turn
         p_end = self.squares[m.target]
         self.squares[m.start] = Piece.Empty
         if m.flag & Move.is_capture:
             self.captured_material.append(m.captured_piece)
         if m.flag & Move.is_double_pawn_move:
-            self.ep_square = (m.start+m.target)//2
+            self.ep_square.append((m.start+m.target)//2)
         else:
-            self.ep_square = -1
+            self.ep_square.append(-1)
         if m.flag & Move.is_ep:
             self.squares[m.target -8*(m.target//8 - m.start//8)] = 0
         if m.flag & Move.is_promotion:
@@ -164,13 +165,26 @@ class Board():
     def unmake_move(self):
         if not len(self.moves_made):
             return
+        self.ep_square.pop()
         m = self.moves_made.pop()
         self.is_white_turn = not self.is_white_turn
         self.squares[m.start] = self.squares[m.target]
         if m.flag & Move.is_capture and not m.flag & Move.is_ep:
             self.squares[m.target] = m.captured_piece
+            self.captured_material.pop()
+        elif m.flag & Move.is_ep:
+            piece = self.captured_material.pop()
+            self.squares[m.target -8*(m.target//8 - m.start//8)] = piece
+            self.squares[m.target] = Piece.Empty
         else:
             self.squares[m.target] = Piece.Empty
+
+    
+    def get_sq_king(self):
+        color = Piece.White if self.is_white_turn else Piece.Black
+        for sq, p in enumerate(self.squares):
+            if p == color | Piece.King:
+                return sq
         
 
     def in_check(self):
@@ -249,13 +263,13 @@ class Board():
                     if y+d == l_line:
                         m.flag |= Move.is_promotion
                     moves.append(m)
-                if Board.xy_to_index(x+1, y+d) == self.ep_square:
+                if Board.xy_to_index(x+1, y+d) == self.ep_square[-1]:
                     m = Move(sq, Board.xy_to_index(x+1, y+d))
                     m.flag |= Move.is_ep
                     m.flag |= Move.is_capture
                     m.captured_piece = enem_color | Piece.Pawn
                     moves.append(m)
-                if Board.xy_to_index(x-1, y+d) == self.ep_square:
+                if Board.xy_to_index(x-1, y+d) == self.ep_square[-1]:
                     m = Move(sq, Board.xy_to_index(x-1, y+d))
                     m.flag |= Move.is_ep
                     m.flag |= Move.is_capture

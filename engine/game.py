@@ -64,7 +64,7 @@ while running:
             mx,my = pygame.mouse.get_pos()
             mx,my = mx//(size), my//(size)
             hover_piece = [b.squares[mx+my*8], mx, my]
-            moves = b.get_pseudo_moves()
+            moves = b.get_moves()
             for m in moves:
                 if m.start == mx+8*my:
                     highlight_sqrs.append(m.target)
@@ -79,7 +79,6 @@ while running:
                     if hm.target == (mx+8*my):
                         m = hm
                 b.make_move(m)
-                b.is_white_turn = not b.is_white_turn
             hover_piece = []
             highlight_sqrs = []
 
