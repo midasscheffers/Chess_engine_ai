@@ -258,12 +258,12 @@ class Board():
                         m = Move(sq, Board.xy_to_index(x, y+2*d))
                         m.flag |= Move.is_double_pawn_move
                         moves.append(m)
-                if Piece.piece_color(self.squares[Board.xy_to_index(x+1, y+d)]) == enem_color and on_board(x+1, y+d):
+                if on_board(x+1, y+d) and Piece.piece_color(self.squares[Board.xy_to_index(x+1, y+d)]) == enem_color:
                     m = Move(sq, Board.xy_to_index(x+1, y+d))
                     if y+d == l_line:
                         m.flag |= Move.is_promotion
                     moves.append(m)
-                if Piece.piece_color(self.squares[Board.xy_to_index(x-1, y+d)]) == enem_color and on_board(x-1, y+d):
+                if on_board(x-1, y+d) and Piece.piece_color(self.squares[Board.xy_to_index(x-1, y+d)]) == enem_color:
                     m = Move(sq, Board.xy_to_index(x-1, y+d))
                     if y+d == l_line:
                         m.flag |= Move.is_promotion
