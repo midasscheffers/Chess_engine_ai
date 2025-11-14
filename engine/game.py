@@ -20,7 +20,7 @@ running = True
 
 dark = (0,50, 100)
 light = (240, 230,200)
-hi_dark = (100,50,0)
+hi_dark = (140, 30,30)
 hi_light = (240, 50,50)
 
 # load board
@@ -35,11 +35,13 @@ for p in ["king", "queen", "rook", "bishop", "knight", "pawn"]:
 
 hover_piece = []
 highlight_sqrs = []
-
+highlight_moves = []
 
 
 def draw_piece(screen, x, y, piece):
     c = "white" if Piece.piece_color(piece) == Piece.White else "black"
+    if piece == 0:
+        return
     type_to_str_dict = {Piece.King:"king", Piece.Pawn:"pawn", Piece.Knight:"knight", Piece.Bishop:"bishop", Piece.Rook:"rook", Piece.Queen:"queen"}
     p = type_to_str_dict[Piece.piece_type(piece)]
     img = piece_imgs[f"{c}_{p}"]
@@ -62,12 +64,17 @@ while running:
             for m in moves:
                 if m.start == mx+8*my:
                     highlight_sqrs.append(m.target)
+                    highlight_moves.append(m)
         
         if event.type == pygame.MOUSEBUTTONUP:
             mx,my = pygame.mouse.get_pos()
             mx,my = mx//(size), my//(size)
             if (mx+8*my) in highlight_sqrs:
-                b.make_move(Move(hover_piece[1]+hover_piece[2]*8, mx+8*my))
+                m = Move(hover_piece[1]+hover_piece[2]*8, mx+8*my)
+                for hm in highlight_moves:
+                    if hm.target == (mx+8*my):
+                        m = hm
+                b.make_move(m)
                 b.is_white_turn = not b.is_white_turn
             hover_piece = []
             highlight_sqrs = []

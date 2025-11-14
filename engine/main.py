@@ -45,12 +45,14 @@ class Piece():
 class Move:
     start:int = 0
     target:int = 0
+    flag:int = 0
 
-    flag = 0
     is_capture = 1
     is_check = 2
     is_castle = 4
     is_promotion = 8
+    is_double_pawn_move = 16
+    is_ep = 32
 
     
 
@@ -142,7 +144,16 @@ class Board():
         p_start = self.squares[m.start]
         p_end = self.squares[m.target]
         self.squares[m.start] = Piece.Empty
-        self.squares[m.target] = p_start
+        if m.flag & Move.is_double_pawn_move:
+            self.ep_square = (m.start+m.target)//2
+        else:
+            self.ep_square = -1
+        if m.flag & Move.is_ep:
+            self.squares[m.target -8*(m.target//8 - m.start//8)] = 0
+        if m.flag & Move.is_promotion:
+            self.squares[m.target] = Piece.piece_color(p_start) | Piece.Queen
+        else:
+            self.squares[m.target] = p_start
         if Piece.piece_type(p_end) == Piece.Empty:
             self.captured_material.append(p_end)
     
@@ -180,16 +191,36 @@ class Board():
             elif this_type == Piece.Pawn:
                 d = -1 if self.is_white_turn else 1
                 f_line = 6 if self.is_white_turn else 1
+                l_line = 0 if self.is_white_turn else 7
                 x,y = sq%8, sq//8
                 
                 if Piece.piece_color(self.squares[Board.xy_to_index(x, y+d)]) == Piece.Empty:
-                            moves.append(Move(sq, Board.xy_to_index(x, y+d)))
-                if Piece.piece_color(self.squares[Board.xy_to_index(x, y+2*d)]) == Piece.Empty and y==f_line:
-                    moves.append(Move(sq, Board.xy_to_index(x, y+2*d)))
+                    m = Move(sq, Board.xy_to_index(x, y+d))
+                    if y+d == l_line:
+                        m.flag |= Move.is_promotion
+                    moves.append(m)
+                    if y==f_line and Piece.piece_color(self.squares[Board.xy_to_index(x, y+2*d)]) == Piece.Empty:
+                        m = Move(sq, Board.xy_to_index(x, y+2*d))
+                        m.flag |= Move.is_double_pawn_move
+                        moves.append(m)
                 if Piece.piece_color(self.squares[Board.xy_to_index(x+1, y+d)]) == enem_color and on_board(x+1, y+d):
-                    moves.append(Move(sq, Board.xy_to_index(x+1, y+d)))
+                    m = Move(sq, Board.xy_to_index(x+1, y+d))
+                    if y+d == l_line:
+                        m.flag |= Move.is_promotion
+                    moves.append(m)
                 if Piece.piece_color(self.squares[Board.xy_to_index(x-1, y+d)]) == enem_color and on_board(x-1, y+d):
-                    moves.append(Move(sq, Board.xy_to_index(x-1, y+d)))
+                    m = Move(sq, Board.xy_to_index(x-1, y+d))
+                    if y+d == l_line:
+                        m.flag |= Move.is_promotion
+                    moves.append(m)
+                if Board.xy_to_index(x+1, y+d) == self.ep_square:
+                    m = Move(sq, Board.xy_to_index(x+1, y+d))
+                    m.flag |= Move.is_ep
+                    moves.append(m)
+                if Board.xy_to_index(x-1, y+d) == self.ep_square:
+                    m = Move(sq, Board.xy_to_index(x-1, y+d))
+                    m.flag |= Move.is_ep
+                    moves.append(m)
                 
 
 
