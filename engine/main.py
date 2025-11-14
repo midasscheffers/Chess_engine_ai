@@ -85,6 +85,8 @@ class Board():
         x,y = ord(cord[0])-97, int(cord[1])-1
         return x+(56-y*8)
 
+    def xy_to_index(x,y):
+        return x+8*y
 
     def load_FEN(self, FEN:str):
         state, turn, castle, ep_square, halfmoves, moves = FEN.split(" ")
@@ -150,6 +152,7 @@ class Board():
         for sq, p in enumerate(self.squares):
             this_type = Piece.piece_type(p)
             this_color = Piece.piece_color(p)
+            enem_color = Piece.Black if this_color == Piece.White else Piece.White
             if not this_color == (Piece.White if self.is_white_turn else Piece.Black):
                 continue
 
@@ -167,13 +170,29 @@ class Board():
                         if (d[0]+d[1])%2 == 0:
                             continue
                     for sm in self.pre_computed.sliding_moves_on_sq[sq][d]:
-                        if Piece.piece_color(self.squares[sm]) == 0:
+                        if Piece.piece_color(self.squares[sm]) == Piece.Empty:
                             moves.append(Move(sq, sm))
                         elif Piece.piece_color(self.squares[sm]) == this_color:
                             break
                         else:
                             moves.append(Move(sq, sm))
                             break
+            elif this_type == Piece.Pawn:
+                d = -1 if self.is_white_turn else 1
+                f_line = 6 if self.is_white_turn else 1
+                x,y = sq%8, sq//8
+                
+                if Piece.piece_color(self.squares[Board.xy_to_index(x, y+d)]) == Piece.Empty:
+                            moves.append(Move(sq, Board.xy_to_index(x, y+d)))
+                if Piece.piece_color(self.squares[Board.xy_to_index(x, y+2*d)]) == Piece.Empty and y==f_line:
+                    moves.append(Move(sq, Board.xy_to_index(x, y+2*d)))
+                if Piece.piece_color(self.squares[Board.xy_to_index(x+1, y+d)]) == enem_color and on_board(x+1, y+d):
+                    moves.append(Move(sq, Board.xy_to_index(x+1, y+d)))
+                if Piece.piece_color(self.squares[Board.xy_to_index(x-1, y+d)]) == enem_color and on_board(x-1, y+d):
+                    moves.append(Move(sq, Board.xy_to_index(x-1, y+d)))
+                
+
+
         return moves
                     
 
