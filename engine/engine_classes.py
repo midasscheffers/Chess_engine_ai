@@ -129,7 +129,7 @@ class Board():
             if i%8==7:
                 print()
         turn = "w" if self.is_white_turn else "b"
-        print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}, ep_sqr:{self.ep_square}")
+        print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}, ep_sqr:{self.ep_square[-1]}")
     
 
     def print_squares(sqrs):
@@ -145,7 +145,6 @@ class Board():
     def make_move(self, m:Move):
         self.moves_made.append(m)
         p_start = self.squares[m.start]
-        self.is_white_turn = not self.is_white_turn
         p_end = self.squares[m.target]
         self.squares[m.start] = Piece.Empty
         if m.flag & Move.is_capture:
@@ -160,14 +159,16 @@ class Board():
             self.squares[m.target] = Piece.piece_color(p_start) | Piece.Queen
         else:
             self.squares[m.target] = p_start
-    
+        self.halfmoves += 1
+        self.moves += 1 if not self.is_white_turn else 0
+        self.is_white_turn = not self.is_white_turn
+            
 
     def unmake_move(self):
         if not len(self.moves_made):
             return
         self.ep_square.pop()
         m = self.moves_made.pop()
-        self.is_white_turn = not self.is_white_turn
         self.squares[m.start] = self.squares[m.target]
         if m.flag & Move.is_capture and not m.flag & Move.is_ep:
             self.squares[m.target] = m.captured_piece
@@ -178,21 +179,25 @@ class Board():
             self.squares[m.target] = Piece.Empty
         else:
             self.squares[m.target] = Piece.Empty
+        self.halfmoves += -1
+        self.moves += -1 if self.is_white_turn else 0
+        self.is_white_turn = not self.is_white_turn
 
     
-    def get_sq_king(self):
-        color = Piece.White if self.is_white_turn else Piece.Black
+    def get_sq_king(self, opps=False):
+        if opps:
+            color = Piece.White if not self.is_white_turn else Piece.Black
+        else:
+            color = Piece.White if self.is_white_turn else Piece.Black
         for sq, p in enumerate(self.squares):
             if p == color | Piece.King:
                 return sq
         
 
-    def in_check(self):
-        self.is_white_turn = not self.is_white_turn
+    def controlled_by_enemy(self, sq):
         enem_move = self.get_pseudo_moves()
-        self.is_white_turn = not self.is_white_turn
         for m in enem_move:
-            if self.get_sq_king() == m.target:
+            if sq == m.target:
                 return True
         return False
 
@@ -202,7 +207,7 @@ class Board():
         final = []
         for m in moves:
             self.make_move(m)
-            if not self.in_check():
+            if not self.controlled_by_enemy(self.get_sq_king(opps=True)):
                 final.append(m)
             self.unmake_move()
         return final
