@@ -20,7 +20,7 @@ running = True
 
 dark = (0,50, 100)
 light = (240, 230,200)
-hi_dark = (140, 30,30)
+hi_dark = (120, 30,60)
 hi_light = (240, 50,50)
 
 # load board
