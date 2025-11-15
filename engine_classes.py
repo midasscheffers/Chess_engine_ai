@@ -130,7 +130,7 @@ class Board():
             if i%8==7:
                 print()
         turn = "w" if self.is_white_turn else "b"
-        print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights}, ep_sqr:{self.ep_square[-1]}")
+        print(f"turn:{turn}, moves:{self.moves}, half moves:{self.halfmoves}, castle rights:{self.castle_rights[-1]}, ep_sqr:{self.ep_square[-1]}")
     
 
     def print_squares(sqrs):
@@ -161,29 +161,29 @@ class Board():
                 self.squares[m.target+1] = Piece.piece_color(p_start) | Piece.Rook
         # castle rights logic
         if p_start == Piece.King|Piece.White:
-            self.castle_rights.append(self.castle_rights[-1] & 12)
-        elif p_start == Piece.King|Piece.Black:
             self.castle_rights.append(self.castle_rights[-1] & 3)
+        elif p_start == Piece.King|Piece.Black:
+            self.castle_rights.append(self.castle_rights[-1] & 12)
         elif p_start == Piece.Rook|Piece.White:
             if m.start%8 == 0:
-                self.castle_rights.append(self.castle_rights[-1] & 8)
+                self.castle_rights.append(self.castle_rights[-1] & 11)
             else:
-                self.castle_rights.append(self.castle_rights[-1] & 4)
+                self.castle_rights.append(self.castle_rights[-1] & 7)
         elif p_end == Piece.Rook|Piece.White:
             if m.target%8 == 0:
-                self.castle_rights.append(self.castle_rights[-1] & 8)
+                self.castle_rights.append(self.castle_rights[-1] & 11)
             else:
-                self.castle_rights.append(self.castle_rights[-1] & 4)
+                self.castle_rights.append(self.castle_rights[-1] & 7)
         elif p_start == Piece.Rook|Piece.Black:
             if m.start%8 == 0:
-                self.castle_rights.append(self.castle_rights[-1] & 2)
+                self.castle_rights.append(self.castle_rights[-1] & 14)
             else:
-                self.castle_rights.append(self.castle_rights[-1] & 1)
+                self.castle_rights.append(self.castle_rights[-1] & 13)
         elif p_end == Piece.Rook|Piece.Black:
             if m.target%8 == 0:
-                self.castle_rights.append(self.castle_rights[-1] & 2)
+                self.castle_rights.append(self.castle_rights[-1] & 14)
             else:
-                self.castle_rights.append(self.castle_rights[-1] & 1)
+                self.castle_rights.append(self.castle_rights[-1] & 13)
         else:
             self.castle_rights.append(self.castle_rights[-1])
         #
@@ -349,7 +349,7 @@ class Board():
                         possible = True
                         for sq_tc in sqs_to_check:
                             # check if all is clear
-                            if not self.squares[sq_tc] == Piece.Empty:
+                            if not self.squares[sq_tc] == Piece.Empty and not sq_tc == sq:
                                 possible = False
                             if self.controlled_by_enemy(sq_tc):
                                 possible = False
@@ -379,13 +379,13 @@ def on_board(x,y):
 
 def castle_sqrs(flag):
     if flag == 8:
-        sqrs = [62, 61]
+        sqrs = [62, 61, 60]
     elif flag == 4:
-        sqrs = [58, 59, 57]
+        sqrs = [58, 59, 57, 60]
     elif flag == 2:
-        sqrs = [6,5]
+        sqrs = [6,5, 4]
     elif flag == 1:
-        sqrs = [2, 1, 3]
+        sqrs = [2, 1, 3, 4]
     else:
         sqrs = []
     return sqrs

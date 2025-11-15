@@ -61,6 +61,10 @@ while running:
             if event.key == pygame.K_u:
                 b.unmake_move()
                 b.print()
+            if event.key == pygame.K_r:
+                enem_moves = b.get_moves()
+                b.make_move(choice(enem_moves))
+                b.print()
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mx,my = pygame.mouse.get_pos()
@@ -82,8 +86,6 @@ while running:
                         m = hm
                 b.make_move(m)
                 b.print()
-                # enem_moves = b.get_moves()
-                # b.make_move(choice(enem_moves))
             hover_piece = []
             highlight_sqrs = []
 
