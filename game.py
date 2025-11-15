@@ -5,6 +5,7 @@ This is the game file responsible for game drawing and such
 
 
 import pygame
+from random import choice
 from engine_classes import *
 
 
@@ -81,6 +82,8 @@ while running:
                         m = hm
                 b.make_move(m)
                 b.print()
+                # enem_moves = b.get_moves()
+                # b.make_move(choice(enem_moves))
             hover_piece = []
             highlight_sqrs = []
 

@@ -63,7 +63,7 @@ class Board():
 
     def __init__(self):
         self.squares = [0 for _ in range(64)]
-        self.castle_rights = 15
+        self.castle_rights = [15]
         self.moves = 1
         self.halfmoves = 0
         self.ep_square = [-1]
@@ -110,6 +110,7 @@ class Board():
         str_to_castle_dict = {"-":0, "K":8, "Q":4, "k":2, "q":1}
         for c in castle:
             self.castle_rights = self.castle_rights | str_to_castle_dict[c]
+        self.castle_rights = [self.castle_rights]
         
         self.squares = [0 for _ in range(64)]
         lines = state.split("/")
@@ -149,6 +150,43 @@ class Board():
         self.squares[m.start] = Piece.Empty
         if m.flag & Move.is_capture:
             self.captured_material.append(m.captured_piece)
+        castled = False
+        if m.flag & Move.is_castle:
+            dir = m.target-m.start
+            if dir == 2:
+                self.squares[m.target+1] = 0
+                self.squares[m.target-1] = Piece.piece_color(p_start) | Piece.Rook
+            else:
+                self.squares[m.target-2] = 0
+                self.squares[m.target+1] = Piece.piece_color(p_start) | Piece.Rook
+        # castle rights logic
+        if p_start == Piece.King|Piece.White:
+            self.castle_rights.append(self.castle_rights[-1] & 12)
+        elif p_start == Piece.King|Piece.Black:
+            self.castle_rights.append(self.castle_rights[-1] & 3)
+        elif p_start == Piece.Rook|Piece.White:
+            if m.start%8 == 0:
+                self.castle_rights.append(self.castle_rights[-1] & 8)
+            else:
+                self.castle_rights.append(self.castle_rights[-1] & 4)
+        elif p_end == Piece.Rook|Piece.White:
+            if m.target%8 == 0:
+                self.castle_rights.append(self.castle_rights[-1] & 8)
+            else:
+                self.castle_rights.append(self.castle_rights[-1] & 4)
+        elif p_start == Piece.Rook|Piece.Black:
+            if m.start%8 == 0:
+                self.castle_rights.append(self.castle_rights[-1] & 2)
+            else:
+                self.castle_rights.append(self.castle_rights[-1] & 1)
+        elif p_end == Piece.Rook|Piece.Black:
+            if m.target%8 == 0:
+                self.castle_rights.append(self.castle_rights[-1] & 2)
+            else:
+                self.castle_rights.append(self.castle_rights[-1] & 1)
+        else:
+            self.castle_rights.append(self.castle_rights[-1])
+        #
         if m.flag & Move.is_double_pawn_move:
             self.ep_square.append((m.start+m.target)//2)
         else:
@@ -168,8 +206,21 @@ class Board():
         if not len(self.moves_made):
             return
         self.ep_square.pop()
+        self.castle_rights.pop()
         m = self.moves_made.pop()
+        p_start = self.squares[m.start]
+        p_end = self.squares[m.target]
         self.squares[m.start] = self.squares[m.target]
+        if m.flag & Move.is_promotion:
+            self.squares[m.start] = Piece.piece_color(p_end) | Piece.Pawn
+        if m.flag & Move.is_castle:
+            dir = m.target-m.start
+            if dir == 2:
+                self.squares[m.target+1] = Piece.piece_color(p_end) | Piece.Rook
+                self.squares[m.target-1] = 0
+            else:
+                self.squares[m.target-2] = Piece.piece_color(p_end) | Piece.Rook
+                self.squares[m.target+1] = 0
         if m.flag & Move.is_capture and not m.flag & Move.is_ep:
             self.squares[m.target] = m.captured_piece
             self.captured_material.pop()
@@ -194,8 +245,12 @@ class Board():
                 return sq
         
 
-    def controlled_by_enemy(self, sq):
-        enem_move = self.get_pseudo_moves()
+    def controlled_by_enemy(self, sq, opps=False):
+        if opps:
+            enem_color = Piece.White if self.is_white_turn else Piece.Black
+        else:
+            enem_color = Piece.White if not self.is_white_turn else Piece.Black
+        enem_move = self.get_pseudo_moves(color_to_check=enem_color, check_casteling=False)
         for m in enem_move:
             if sq == m.target:
                 return True
@@ -207,19 +262,21 @@ class Board():
         final = []
         for m in moves:
             self.make_move(m)
-            if not self.controlled_by_enemy(self.get_sq_king(opps=True)):
+            if not self.controlled_by_enemy(self.get_sq_king(opps=True), opps=True):
                 final.append(m)
             self.unmake_move()
         return final
 
 
-    def get_pseudo_moves(self):
+    def get_pseudo_moves(self, color_to_check=None, check_casteling=True):
+        if color_to_check == None:
+            color_to_check = (Piece.White if self.is_white_turn else Piece.Black)
         moves = []
         for sq, p in enumerate(self.squares):
             this_type = Piece.piece_type(p)
             this_color = Piece.piece_color(p)
             enem_color = Piece.Black if this_color == Piece.White else Piece.White
-            if not this_color == (Piece.White if self.is_white_turn else Piece.Black):
+            if not this_color == color_to_check:
                 continue
 
             # run for different pieces the code
@@ -285,7 +342,23 @@ class Board():
                     sm = self.pre_computed.sliding_moves_on_sq[sq][d][0]
                     if not Piece.piece_color(self.squares[sm]) == this_color:
                         moves.append(Move(sq, sm))
-                # add castle moves
+                possible_castle = [8,4] if this_color == Piece.White else [2,1]
+                for fl in possible_castle:
+                    if self.castle_rights[-1] & fl and check_casteling:
+                        sqs_to_check = castle_sqrs(fl)
+                        possible = True
+                        for sq_tc in sqs_to_check:
+                            # check if all is clear
+                            if not self.squares[sq_tc] == Piece.Empty:
+                                possible = False
+                            if self.controlled_by_enemy(sq_tc):
+                                possible = False
+                            # check if not sqrs controlled by enemy
+                        if possible:
+                            m = Move(sq, sqs_to_check[0])
+                            m.flag = Move.is_castle
+                            moves.append(m)
+
 
 
         for m in moves:
@@ -303,6 +376,19 @@ def on_board(x,y):
     if x<0 or x>7 or y<0 or y>7:
         return False
     return True
+
+def castle_sqrs(flag):
+    if flag == 8:
+        sqrs = [62, 61]
+    elif flag == 4:
+        sqrs = [58, 59, 57]
+    elif flag == 2:
+        sqrs = [6,5]
+    elif flag == 1:
+        sqrs = [2, 1, 3]
+    else:
+        sqrs = []
+    return sqrs
 
 
 
