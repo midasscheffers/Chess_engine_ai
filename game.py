@@ -13,8 +13,8 @@ from engine_classes import *
 
 # pygame setup
 pygame.init()
-size = 100
-screen = pygame.display.set_mode((8*size, 8*size))
+size = 120
+screen = pygame.display.set_mode((8*size, 8*size)) #, pygame.FULLSCREEN
 clock = pygame.time.Clock()
 running = True
 
@@ -58,6 +58,8 @@ while running:
             running = False
 
         elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                running = False
             if event.key == pygame.K_u:
                 b.unmake_move()
                 b.print()
@@ -102,7 +104,7 @@ while running:
         # draw piece
         if not Piece.piece_type(b.squares[sq]) == Piece.Empty:
             if not [b.squares[sq], x,y] == hover_piece:
-                draw_piece(screen, x*100+size/4,y*100, b.squares[sq])
+                draw_piece(screen, x*size+size/4,y*size, b.squares[sq])
         if not hover_piece == []:
             mx, my = pygame.mouse.get_pos()
             draw_piece(screen, mx-size/4,my-(size*0.75), hover_piece[0])
