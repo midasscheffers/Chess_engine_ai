@@ -246,22 +246,39 @@ class Board():
         
 
     def controlled_by_enemy(self, sq, opps=False):
+        if sq == None:
+            return True
         if opps:
             enem_color = Piece.White if self.is_white_turn else Piece.Black
+            enem_pawn_dir = 1 if self.is_white_turn else -1
         else:
             enem_color = Piece.White if not self.is_white_turn else Piece.Black
+            enem_pawn_dir = 1 if not self.is_white_turn else -1
         #check if an enemy sliding piece is looking at the sq
+        # self.print()
+        # print("cc", sq)
         for d in self.pre_computed.sliding_moves_on_sq[sq]:
-            pieces_to_check_for = [Piece.Queen|enem_color, Piece.Bishop|enem_color] if (d[0]+d[1])&2==0 else [Piece.Queen|enem_color, Piece.Rook|enem_color]
+            pieces_to_check_for = [Piece.Queen|enem_color, Piece.Bishop|enem_color] if ((d[0]+d[1])%2==0) else [Piece.Queen|enem_color, Piece.Rook|enem_color]
+            first_slide_check = True
             for sm in self.pre_computed.sliding_moves_on_sq[sq][d]:
                 if not self.squares[sm] == Piece.Empty:
-                    if self.squares[sm] in pieces_to_check_for:
+                    if first_slide_check and self.squares[sm] == Piece.King|enem_color:
                         return True
+                    if self.squares[sm] in pieces_to_check_for:
+                        return True , f"by {self.squares[sm]} on {sm}" 
                     break
+                first_slide_check = False
         # check if a knight is a knight move away
         for km in self.pre_computed.knight_moves_on_sq[sq]:
             if self.squares[km] == Piece.Knight | enem_color:
-                return True
+                return True, f"by {Piece.Knight | enem_color} on {km}" 
+        # check for pawns
+        x,y = sq%8, sq//8
+        if on_board(x+1, y+enem_pawn_dir) and self.squares[(x+1+8*(y+enem_pawn_dir))] == Piece.Pawn | enem_color:
+            return True
+        if on_board(x-1, y+enem_pawn_dir) and self.squares[(x-1+8*(y+enem_pawn_dir))] == Piece.Pawn | enem_color:
+            return True
+
         return False
 
 
@@ -270,7 +287,9 @@ class Board():
         final = []
         for m in moves:
             self.make_move(m)
-            if not self.controlled_by_enemy(self.get_sq_king(opps=True), opps=True):
+            king_sq = self.get_sq_king(opps=True)
+            # print("ks", king_sq)
+            if not self.controlled_by_enemy(king_sq, opps=True):
                 final.append(m)
             self.unmake_move()
         return final
@@ -384,6 +403,7 @@ def on_board(x,y):
     if x<0 or x>7 or y<0 or y>7:
         return False
     return True
+
 
 def castle_sqrs(flag):
     if flag == 8:

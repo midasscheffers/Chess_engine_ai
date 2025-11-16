@@ -8,20 +8,6 @@ Use alpha beta pruning.
 
 
 from engine_classes import *
-from random import choice
-
-b = Board()
-
-def positions_reached(depth):
-    if depth == 0:
-        return 1
-    total = 0
-    moves = b.get_pseudo_moves()
-    for m in moves:
-        b.make_move(m)
-        total += positions_reached(depth-1)
-        b.unmake_move()
-    return total
 
 
 class Chess_Bot:

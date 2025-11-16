@@ -77,6 +77,7 @@ while running:
             mx,my = pygame.mouse.get_pos()
             mx,my = mx//(size), my//(size)
             hover_piece = [b.squares[mx+my*8], mx, my]
+            print(b.controlled_by_enemy(mx+8*my))
             moves = b.get_moves()
             for m in moves:
                 if m.start == mx+8*my:
@@ -99,12 +100,12 @@ while running:
             highlight_sqrs = []
 
     if pressing_r:
-        enem_moves = b.get_moves()
-        if len(enem_moves) == 0:
+        moves = b.get_moves()
+        if len(moves) == 0:
             c = "black" if b.is_white_turn else "white"
             print(f"{c} has won")
         else:
-            b.make_move(choice(enem_moves))
+            b.make_move(choice(moves))
 
     screen.fill("black")
 
