@@ -77,7 +77,6 @@ while running:
             mx,my = pygame.mouse.get_pos()
             mx,my = mx//(size), my//(size)
             hover_piece = [b.squares[mx+my*8], mx, my]
-            print(b.controlled_by_enemy(mx+8*my))
             moves = b.get_moves()
             for m in moves:
                 if m.start == mx+8*my:
@@ -94,8 +93,8 @@ while running:
                         m = hm
                 b.make_move(m)
                 b.print()
-                # bot.make_move()
-                # b.print()
+                bot.make_move()
+                b.print()
             hover_piece = []
             highlight_sqrs = []
 

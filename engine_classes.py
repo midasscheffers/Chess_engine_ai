@@ -265,13 +265,13 @@ class Board():
                     if first_slide_check and self.squares[sm] == Piece.King|enem_color:
                         return True
                     if self.squares[sm] in pieces_to_check_for:
-                        return True , f"by {self.squares[sm]} on {sm}" 
+                        return True
                     break
                 first_slide_check = False
         # check if a knight is a knight move away
         for km in self.pre_computed.knight_moves_on_sq[sq]:
             if self.squares[km] == Piece.Knight | enem_color:
-                return True, f"by {Piece.Knight | enem_color} on {km}" 
+                return True 
         # check for pawns
         x,y = sq%8, sq//8
         if on_board(x+1, y+enem_pawn_dir) and self.squares[(x+1+8*(y+enem_pawn_dir))] == Piece.Pawn | enem_color:
