@@ -7,6 +7,7 @@ This is the game file responsible for game drawing and such
 import pygame
 from random import choice
 from engine_classes import *
+from basic_bot import *
 
 
 
@@ -24,8 +25,9 @@ light = (240, 230,200)
 hi_dark = (120, 30,60)
 hi_light = (240, 50,50)
 
-# load board
+# load board and bot
 b = Board()
+bot = Chess_Bot(b)
 # load images
 piece_imgs={}
 for p in ["king", "queen", "rook", "bishop", "knight", "pawn"]:
@@ -91,13 +93,18 @@ while running:
                         m = hm
                 b.make_move(m)
                 b.print()
+                # bot.make_move()
+                # b.print()
             hover_piece = []
             highlight_sqrs = []
 
     if pressing_r:
         enem_moves = b.get_moves()
-        b.make_move(choice(enem_moves))
-        b.print()
+        if len(enem_moves) == 0:
+            c = "black" if b.is_white_turn else "white"
+            print(f"{c} has won")
+        else:
+            b.make_move(choice(enem_moves))
 
     screen.fill("black")
 
@@ -121,7 +128,7 @@ while running:
 
     pygame.display.flip()
 
-    clock.tick(60)  # limits FPS to 60
+    # clock.tick(60)  # limits FPS to 60
 
 pygame.quit()
 

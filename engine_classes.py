@@ -306,7 +306,7 @@ class Board():
                 l_line = 0 if self.is_white_turn else 7
                 x,y = sq%8, sq//8
                 
-                if Piece.piece_color(self.squares[Board.xy_to_index(x, y+d)]) == Piece.Empty:
+                if on_board(x, y+d) and Piece.piece_color(self.squares[Board.xy_to_index(x, y+d)]) == Piece.Empty:
                     m = Move(sq, Board.xy_to_index(x, y+d))
                     if y+d == l_line:
                         m.flag |= Move.is_promotion
