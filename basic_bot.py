@@ -69,6 +69,6 @@ class Chess_Bot:
             sign = 1 if Piece.piece_color(p) == Piece.White else -1
             val = sign * piece_val_dic[Piece.piece_type(p)]
             piece_val += val
-        return -piece_val
+        return piece_val
 
 
