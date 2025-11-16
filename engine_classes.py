@@ -250,9 +250,17 @@ class Board():
             enem_color = Piece.White if self.is_white_turn else Piece.Black
         else:
             enem_color = Piece.White if not self.is_white_turn else Piece.Black
-        enem_move = self.get_pseudo_moves(color_to_check=enem_color, check_casteling=False)
-        for m in enem_move:
-            if sq == m.target:
+        #check if an enemy sliding piece is looking at the sq
+        for d in self.pre_computed.sliding_moves_on_sq[sq]:
+            pieces_to_check_for = [Piece.Queen|enem_color, Piece.Bishop|enem_color] if (d[0]+d[1])&2==0 else [Piece.Queen|enem_color, Piece.Rook|enem_color]
+            for sm in self.pre_computed.sliding_moves_on_sq[sq][d]:
+                if not self.squares[sm] == Piece.Empty:
+                    if self.squares[sm] in pieces_to_check_for:
+                        return True
+                    break
+        # check if a knight is a knight move away
+        for km in self.pre_computed.knight_moves_on_sq[sq]:
+            if self.squares[km] == Piece.Knight | enem_color:
                 return True
         return False
 

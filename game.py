@@ -93,8 +93,8 @@ while running:
                         m = hm
                 b.make_move(m)
                 b.print()
-                bot.make_move()
-                b.print()
+                # bot.make_move()
+                # b.print()
             hover_piece = []
             highlight_sqrs = []
 
