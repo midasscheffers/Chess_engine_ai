@@ -32,11 +32,11 @@ class Chess_Bot:
 
     def make_move(self):
         depth = 3
-        sc,m = self.Search_move_tree_for_best_move(depth)
+        sc,m = self.Search_move_tree_for_best_move(depth, -1e10, 1e10)
         self.board.make_move(m)
 
 
-    def Search_move_tree_for_best_move(self, depth):
+    def Search_move_tree_for_best_move(self, depth, alpha, beta):
         if depth == 0:
             return self.eval(), None
         moves = self.board.get_moves()
@@ -46,11 +46,16 @@ class Chess_Bot:
         best_move = moves[0]
         for m in moves:
             self.board.make_move(m)
-            trial, _ = self.Search_move_tree_for_best_move(depth-1)
+            trial, _ = self.Search_move_tree_for_best_move(depth-1, -beta, -alpha)
             trial = -trial
             if trial > best_score:
                 best_move = m
                 best_score = trial
+                if trial > alpha:
+                    alpha = trial
+            if trial >= beta:
+                self.board.unmake_move()
+                break
             self.board.unmake_move()
 
         return best_score, best_move
@@ -64,6 +69,6 @@ class Chess_Bot:
             sign = 1 if Piece.piece_color(p) == Piece.White else -1
             val = sign * piece_val_dic[Piece.piece_type(p)]
             piece_val += val
-        return piece_val
+        return -piece_val
 
 
