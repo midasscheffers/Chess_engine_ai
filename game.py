@@ -49,6 +49,7 @@ def draw_piece(screen, x, y, piece):
     screen.blit(img, [x,y])
 
 
+pressing_r = False
 
 while running:
     # poll for events
@@ -64,9 +65,11 @@ while running:
                 b.unmake_move()
                 b.print()
             if event.key == pygame.K_r:
-                enem_moves = b.get_moves()
-                b.make_move(choice(enem_moves))
-                b.print()
+                pressing_r = True
+                
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_r:
+                pressing_r = False
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mx,my = pygame.mouse.get_pos()
@@ -90,6 +93,11 @@ while running:
                 b.print()
             hover_piece = []
             highlight_sqrs = []
+
+    if pressing_r:
+        enem_moves = b.get_moves()
+        b.make_move(choice(enem_moves))
+        b.print()
 
     screen.fill("black")
 
