@@ -24,10 +24,12 @@ dark = (0,50, 100)
 light = (240, 230,200)
 hi_dark = (120, 30,60)
 hi_light = (240, 50,50)
+hi_yellow_light = (237, 212, 138)
+hi_yellow_dark = (181, 160, 54)
 
 # load board and bot
 b = Board()
-bot = Chess_Bot(b)
+bot = Chess_Bot()
 # load images
 piece_imgs={}
 for p in ["king", "queen", "rook", "bishop", "knight", "pawn"]:
@@ -39,6 +41,7 @@ for p in ["king", "queen", "rook", "bishop", "knight", "pawn"]:
 hover_piece = []
 highlight_sqrs = []
 highlight_moves = []
+made_move_highlight = []
 
 
 def draw_piece(screen, x, y, piece):
@@ -53,6 +56,22 @@ def draw_piece(screen, x, y, piece):
 
 pressing_r = False
 
+def make_move(board:Board, m:Move):
+    global made_move_highlight
+    board.make_move(m)
+    made_move_highlight = [m.start, m.target]
+
+
+def unmake_move(board:Board):
+    global made_move_highlight
+    board.unmake_move()
+    if len(board.moves_made):
+        m:Move = board.moves_made[-1]
+        made_move_highlight = [m.start, m.target]
+    else:
+        made_move_highlight = []
+
+
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -64,7 +83,7 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
             if event.key == pygame.K_u:
-                b.unmake_move()
+                unmake_move(b)
                 b.print()
             if event.key == pygame.K_r:
                 pressing_r = True
@@ -93,7 +112,8 @@ while running:
                         m = hm
                 b.make_move(m)
                 b.print()
-                bot.make_move()
+                m:Move = bot.suggest_move(b, mode="random")
+                make_move(b, m)
                 b.print()
             hover_piece = []
             highlight_sqrs = []
@@ -104,7 +124,8 @@ while running:
             c = "black" if b.is_white_turn else "white"
             print(f"{c} has won")
         else:
-            b.make_move(choice(moves))
+            rm = choice(moves)
+            make_move(b, rm)
 
     screen.fill("black")
 
@@ -113,6 +134,8 @@ while running:
         # draw square
         if sq in highlight_sqrs:
             color = hi_light if (x+y)%2==0 else hi_dark
+        elif sq in made_move_highlight:
+            color = hi_yellow_light if (x+y)%2==0 else hi_yellow_dark
         else:
             color = light if (x+y)%2==0 else dark
         pygame.draw.rect(screen, color, [x*size, y*size, size, size])
