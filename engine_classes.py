@@ -255,8 +255,6 @@ class Board():
             enem_color = Piece.White if not self.is_white_turn else Piece.Black
             enem_pawn_dir = 1 if not self.is_white_turn else -1
         #check if an enemy sliding piece is looking at the sq
-        # self.print()
-        # print("cc", sq)
         for d in self.pre_computed.sliding_moves_on_sq[sq]:
             pieces_to_check_for = [Piece.Queen|enem_color, Piece.Bishop|enem_color] if ((d[0]+d[1])%2==0) else [Piece.Queen|enem_color, Piece.Rook|enem_color]
             first_slide_check = True

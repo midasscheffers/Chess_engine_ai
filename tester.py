@@ -5,8 +5,10 @@ For testing the engine
 
 
 from engine_classes import *
+import time
 
 b = Board()
+b.load_FEN("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8")
 
 def positions_reached(depth):
     if depth == 0:
@@ -21,4 +23,8 @@ def positions_reached(depth):
 
 
 for i in range(1,6):
-    print(f"Found at ply{i}: {positions_reached(i)}")
+    t_start = time.time()*1000.0
+    number = positions_reached(i)
+    t_end = time.time()*1000.0
+    dt = t_end - t_start
+    print(f"Found at ply{i}: {number}, in {dt} ms")
