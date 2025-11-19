@@ -22,7 +22,7 @@ running = True
 
 dark = (0,50, 100)
 light = (240, 230,200)
-hi_dark = (120, 30,60)
+hi_dark = (153, 18, 18)
 hi_light = (240, 50,50)
 hi_yellow_light = (237, 212, 138)
 hi_yellow_dark = (181, 160, 54)
@@ -110,9 +110,9 @@ while running:
                 for hm in highlight_moves:
                     if hm.target == (mx+8*my):
                         m = hm
-                b.make_move(m)
+                make_move(b, m)
                 b.print()
-                m:Move = bot.suggest_move(b, mode="random")
+                m:Move = bot.suggest_move(b)
                 make_move(b, m)
                 b.print()
             hover_piece = []
