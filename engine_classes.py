@@ -54,9 +54,6 @@ class Move:
     is_double_pawn_move = 8
     is_ep = 16
 
-    
-
-
 
 
 class Board():
@@ -88,8 +85,10 @@ class Board():
         x,y = ord(cord[0])-97, int(cord[1])-1
         return x+(56-y*8)
 
+
     def xy_to_index(x,y):
         return x+8*y
+
 
     def load_FEN(self, FEN:str):
         state, turn, castle, ep_square, halfmoves, moves = FEN.split(" ")
@@ -235,25 +234,27 @@ class Board():
         self.is_white_turn = not self.is_white_turn
 
     
-    def get_sq_king(self, opps=False):
-        if opps:
-            color = Piece.White if not self.is_white_turn else Piece.Black
-        else:
-            color = Piece.White if self.is_white_turn else Piece.Black
+    def get_sq_king(self, color):
         for sq, p in enumerate(self.squares):
             if p == color | Piece.King:
                 return sq
         
 
-    def controlled_by_enemy(self, sq, opps=False):
+    def is_check(self):
+        king_squares = [sq for sq in range(63) if Piece.piece_type(self.squares[sq]) == Piece.King]
+        for ks in king_squares:
+            king_color = Piece.piece_color(self.squares[ks])
+            opp_color = Piece.White if king_color==Piece.Black else Piece.Black
+            if self.sq_controlled_by_color(ks, opp_color):
+                return True
+        return False
+
+
+    def sq_controlled_by_color(self, sq, enem_color):
         if sq == None:
-            return True
-        if opps:
-            enem_color = Piece.White if self.is_white_turn else Piece.Black
-            enem_pawn_dir = 1 if self.is_white_turn else -1
-        else:
-            enem_color = Piece.White if not self.is_white_turn else Piece.Black
-            enem_pawn_dir = 1 if not self.is_white_turn else -1
+            return False
+        
+        enem_pawn_dir = 1 if enem_color==Piece.White else -1
         #check if an enemy sliding piece is looking at the sq
         for d in self.pre_computed.sliding_moves_on_sq[sq]:
             pieces_to_check_for = [Piece.Queen|enem_color, Piece.Bishop|enem_color] if ((d[0]+d[1])%2==0) else [Piece.Queen|enem_color, Piece.Rook|enem_color]
@@ -283,11 +284,13 @@ class Board():
     def get_moves(self):
         moves = self.get_pseudo_moves()
         final = []
+        color = Piece.White if self.is_white_turn else Piece.Black
+        enem_color = Piece.White if not self.is_white_turn else Piece.Black
         for m in moves:
             self.make_move(m)
-            king_sq = self.get_sq_king(opps=True)
+            king_sq = self.get_sq_king(color)
             # print("ks", king_sq)
-            if not self.controlled_by_enemy(king_sq, opps=True):
+            if not self.sq_controlled_by_color(king_sq, enem_color):
                 final.append(m)
             self.unmake_move()
         return final
@@ -376,7 +379,7 @@ class Board():
                             # check if all is clear
                             if not self.squares[sq_tc] == Piece.Empty and not sq_tc == sq:
                                 possible = False
-                            if self.controlled_by_enemy(sq_tc):
+                            if self.sq_controlled_by_color(sq_tc, enem_color):
                                 possible = False
                             # check if not sqrs controlled by enemy
                         if possible:

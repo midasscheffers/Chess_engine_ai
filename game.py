@@ -112,7 +112,8 @@ while running:
                         m = hm
                 make_move(b, m)
                 b.print()
-                m:Move = bot.suggest_move(b)
+                m, score = bot.suggest_move(b)
+                print(f"With score: {score}")
                 make_move(b, m)
                 b.print()
             hover_piece = []

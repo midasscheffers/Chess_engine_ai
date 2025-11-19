@@ -9,7 +9,7 @@ Use alpha beta pruning.
 
 from engine_classes import *
 from copy import deepcopy
-from random import choice
+from random import choice, random
 
 
 PieceValueTalbes = {
@@ -92,10 +92,10 @@ class Chess_Bot:
             depth = 3
             temp_board = deepcopy(board)
             sc,m = self.Search_move_tree_for_best_move(temp_board, depth, -1e10, 1e10)
-            return m
+            return (m, sc)
         else:
             moves = board.get_moves()
-            return choice(moves)
+            return (choice(moves), 0)
 
 
     def Search_move_tree_for_best_move(self, board:Board, depth:int, alpha:float, beta:float):
@@ -103,9 +103,12 @@ class Chess_Bot:
             return self.eval(board), None
         moves = board.get_moves()
         if not len(moves):
-            return -1e10, None
+            if board.is_check():
+                return -1e10, None
+            else:
+                return 0, None
         best_score = -1e10
-        best_move = moves[0]
+        best_move = None
         for m in moves:
             board.make_move(m)
             trial, _ = self.Search_move_tree_for_best_move(board, depth-1, -beta, -alpha)
@@ -126,15 +129,16 @@ class Chess_Bot:
     def eval(self, board:Board):
         piece_val_dic = {Piece.King:1e6, Piece.Queen:9, Piece.Rook:5, Piece.Bishop:3, Piece.Knight:3, Piece.Pawn:1, Piece.Empty:0}
         piece_val = 0
+        perspective = 1 if board.is_white_turn else -1
         for sq in range(64):
             p = board.squares[sq]
             if Piece.piece_color(p) == Piece.White:
                 value_table_sq = sq
             else:
-                value_table_sq = 63-sq
+                value_table_sq = (7-sq//8)*8+sq%8
             sign = 1 if Piece.piece_color(p) == Piece.White else -1
             val = sign * piece_val_dic[Piece.piece_type(p)] * PieceValueTalbes[Piece.piece_type(p)][value_table_sq]
             piece_val += val
-        return piece_val
+        return (piece_val + (1e-6 * random())) * perspective
 
 
