@@ -26,7 +26,7 @@ class Board:
 
     
     def set_piece(self, p, sq):
-
+        pass
 
     def remove_piece(self, sq):
         for bb in self.bitboards:

@@ -148,8 +148,25 @@ class Board{
 
     void print(){
         for (int i=0; i<12; i++){
-            cout << "Bitboard " << i << ": " << bitboards[i] << endl << endl;
+            cout << "Bitboard " << i << ": " << endl;
+            print_bitbboard(bitboards[i]);
         }
+    }
+
+    void print_bitbboard(unsigned long long bb){
+        for (int i=0;i<64;i++){
+            if (i%8==0 && i!=0){
+                cout << endl;
+            }
+            unsigned long long one = 1;
+            if(bb & one<<i){
+                cout << "X";
+            }
+            else{
+                cout << ".";
+            }
+        }
+        cout << endl;
     }
 };
 
