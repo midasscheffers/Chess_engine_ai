@@ -137,7 +137,7 @@ class Chess_Bot:
             else:
                 value_table_sq = (7-sq//8)*8+sq%8
             sign = 1 if Piece.piece_color(p) == Piece.White else -1
-            val = sign * piece_val_dic[Piece.piece_type(p)] * PieceValueTalbes[Piece.piece_type(p)][value_table_sq]
+            val = sign * piece_val_dic[Piece.piece_type(p)] #* PieceValueTalbes[Piece.piece_type(p)][value_table_sq]
             piece_val += val
         return (piece_val + (1e-6 * random())) * perspective
 
