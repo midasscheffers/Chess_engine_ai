@@ -75,9 +75,28 @@ using namespace std;
 
 
 
-// class BitBoard{
-//     unsigned long long bits = 0;
-// };
+struct BitBoard{
+    unsigned long long FULL = ULLONG_MAX;
+    unsigned long long LEFT_COL = 0x0101010101010101;
+    unsigned long long TOP_ROW = 0x00000000000000ff;
+
+
+    void print(unsigned long long bb){
+        for (int i=0;i<64;i++){
+            if (i%8==0 && i!=0){
+                cout << endl;
+            }
+            unsigned long long one = 1;
+            if(bb & one<<i){
+                cout << "X";
+            }
+            else{
+                cout << ".";
+            }
+        }
+        cout << endl;
+    }
+};
 
 
 
@@ -88,6 +107,18 @@ class Board{
     // vector<Piece> pieces;
 
     unsigned long long bitboards[12]; // 0-5 white 6-11 black k,p,n,b,r,q
+
+    unordered_map<char,int> char_to_piece = {
+        {'K',0}, {'P', 1}, {'N',2}, {'B', 3}, {'R', 4}, {'Q', 5},
+        {'k',6}, {'p', 7}, {'n',8}, {'b', 9}, {'r', 10}, {'q', 11}
+    };
+
+    unordered_map<int,char> piece_to_char = {
+        {0, 'K'}, {1, 'P'}, {2, 'N'}, {3, 'B'}, {4, 'R'}, {5, 'Q'},
+        {6, 'k'}, {7, 'p'}, {8, 'n'}, {9, 'b'}, {10, 'r'}, {11, 'q'}
+    };
+
+
 
 
     Board(){
@@ -118,10 +149,7 @@ class Board{
 
     void LoadFEN(string FEN){
         cout << "Loading FEN: " << FEN << endl;
-        unordered_map<char,int> char_to_piece = {
-            {'K',0}, {'P', 1}, {'N',2}, {'B', 3}, {'R', 4}, {'Q', 5},
-            {'k',6}, {'p', 7}, {'n',8}, {'b', 9}, {'r', 10}, {'q', 11}
-        };
+        
         // cut string
         vector<string> data;
         for (int i=0; i<6; i++){
@@ -149,25 +177,10 @@ class Board{
     void print(){
         for (int i=0; i<12; i++){
             cout << "Bitboard " << i << ": " << endl;
-            print_bitbboard(bitboards[i]);
+            BitBoard().print(bitboards[i]);
         }
     }
 
-    void print_bitbboard(unsigned long long bb){
-        for (int i=0;i<64;i++){
-            if (i%8==0 && i!=0){
-                cout << endl;
-            }
-            unsigned long long one = 1;
-            if(bb & one<<i){
-                cout << "X";
-            }
-            else{
-                cout << ".";
-            }
-        }
-        cout << endl;
-    }
 };
 
 
@@ -175,5 +188,10 @@ class Board{
 int main(){
     Board b = Board();
     b.print();
+    cout << endl;
+    BitBoard().print(BitBoard().LEFT_COL<<1);
+    cout << endl;
+    BitBoard().print(BitBoard().TOP_ROW<<8);
+
     return 0;
 }
