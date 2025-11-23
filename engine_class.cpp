@@ -44,6 +44,10 @@ using namespace std;
 //         square = sq;
 //     }
 
+//     Location(){
+//         square=-1;
+//     }
+
 //     pair<int,int> xy(){
 //         return make_pair(square/8, square%8);
 //     }
@@ -51,27 +55,28 @@ using namespace std;
 //     int sq(){
 //         return square;
 //     }
-//     Location(){
-
-//     }
+    
 
 
 // };
 
 
 
-// class Move{
-//     public:
-//     Location start;
-//     Location end;
-//     int flag;
+struct Move{
+    int start; //start sq
+    int end; // end sq
 
-//     const int is_capture = 1;
-//     const int is_castle = 2;
-//     const int is_promotion = 4;
-//     const int is_double_pawn_move = 8;
-//     const int is_ep = 16;
-// };
+    bool is_capture = false;
+    bool is_castle = false;
+    bool is_promotion = false;
+    bool is_double_pawn_move = false;
+    bool is_ep = false;
+
+    Move(int s, int e){
+        start = s;
+        end = e;
+    }
+};
 
 
 
@@ -107,6 +112,12 @@ class Board{
     // vector<Piece> pieces;
 
     unsigned long long bitboards[12]; // 0-5 white 6-11 black k,p,n,b,r,q
+    unsigned long long all_black_pieces;
+    unsigned long long all_white_pieces;
+    unsigned long long empty_squares;
+    bool is_white_turn;
+    vector<vector<bool>> casteling_rights;
+    vector<int> ep_sq;
 
     unordered_map<char,int> char_to_piece = {
         {'K',0}, {'P', 1}, {'N',2}, {'B', 3}, {'R', 4}, {'Q', 5},
@@ -115,7 +126,8 @@ class Board{
 
     unordered_map<int,char> piece_to_char = {
         {0, 'K'}, {1, 'P'}, {2, 'N'}, {3, 'B'}, {4, 'R'}, {5, 'Q'},
-        {6, 'k'}, {7, 'p'}, {8, 'n'}, {9, 'b'}, {10, 'r'}, {11, 'q'}
+        {6, 'k'}, {7, 'p'}, {8, 'n'}, {9, 'b'}, {10, 'r'}, {11, 'q'}, 
+        {-1, '.'}
     };
 
 
@@ -144,11 +156,14 @@ class Board{
         for (int i=0;i<12;i++){
             bitboards[i] = 0;
         }
+        all_white_pieces = 0;
+        all_black_pieces = 0;
+        empty_squares = 0;
     }
 
 
     void LoadFEN(string FEN){
-        cout << "Loading FEN: " << FEN << endl;
+        // cout << "Loading FEN: " << FEN << endl;
         
         // cut string
         vector<string> data;
@@ -158,6 +173,7 @@ class Board{
             data.push_back(substr);
             FEN = FEN.substr(space_index+1, FEN.length());
         }
+        // load pieces
         string pieces = data[0];
         reset_bitboards();
         int point = 0;
@@ -172,13 +188,80 @@ class Board{
                 point ++;
             }
         }
+        for(int i = 0; i<=5 ; i++){
+            all_white_pieces |= bitboards[i];
+        }
+        for(int i = 6; i<=11 ; i++){
+            all_black_pieces |= bitboards[i];
+        }
+        empty_squares = ~(all_black_pieces|all_white_pieces);
+        // load the rest of the data
+        is_white_turn = (data[1]=="w") ? true : false;
+        // casteling rights
+        casteling_rights.clear();
+        vector<bool> rights = {false, false, false, false};
+        unordered_map<char,int> char_to_int_rights = {{'K', 0}, {'Q', 1}, {'k', 2}, {'q', 3}};
+        for (int c = 0; c<data[2].length(); c++){
+            char curr_char = data[2][c];
+            if (not curr_char == '-'){
+                rights[char_to_int_rights[curr_char]] = true;
+            }
+        }
+        casteling_rights.push_back(rights);
+        // ep_sq
+        // move_counters
+
     }
 
     void print(){
-        for (int i=0; i<12; i++){
-            cout << "Bitboard " << i << ": " << endl;
-            BitBoard().print(bitboards[i]);
+        for (int i=0; i<64; i++){
+            int p = piece_on_sq(i);
+            cout << piece_to_char[p];
+            if (i%8==7){
+                cout << endl;
+            }
         }
+        // print castle rights
+    }
+
+
+    int piece_on_sq(int sq){
+        unsigned long long one = 1;
+        unsigned long long to_check = one<<sq;
+        for(int i = 0; i<=11; i++){
+            if (bitboards[i] & to_check){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
+    void make_move(Move m){
+        // check non special moves first
+        if (not (m.is_castle or m.is_capture or m.is_ep)){
+
+        }
+        else if (m.is_castle){
+
+        }
+        else if (m.is_ep){
+
+        }
+        else if (m.is_capture){
+
+        }
+        // update all piece boards
+        all_white_pieces = 0;
+        all_black_pieces = 0;
+        empty_squares = 0;
+        for(int i = 0; i<=5 ; i++){
+            all_white_pieces |= bitboards[i];
+        }
+        for(int i = 6; i<=11 ; i++){
+            all_black_pieces |= bitboards[i];
+        }
+        empty_squares = ~(all_black_pieces|all_white_pieces);
     }
 
 };
@@ -189,9 +272,5 @@ int main(){
     Board b = Board();
     b.print();
     cout << endl;
-    BitBoard().print(BitBoard().LEFT_COL<<1);
-    cout << endl;
-    BitBoard().print(BitBoard().TOP_ROW<<8);
-
     return 0;
 }
