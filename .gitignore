@@ -3,3 +3,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+.vscode/
+*.json
+
+cpp_engine/
+*.exe
