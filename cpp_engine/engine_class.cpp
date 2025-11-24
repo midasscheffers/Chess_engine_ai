@@ -106,6 +106,7 @@ class Board{
         }
     }
 
+    
     void remove_piece(int p, int sq){
         unsigned long long one = 1;
         bitboards[p] = ~((~bitboards[p]) | (one<<sq));
@@ -215,11 +216,11 @@ class Board{
             cout << "Bitboard: " << i << endl;
             BitBoard().print(bitboards[i]);
         }
-        cout << "AW BB:" << endl;
+        cout << "All White BB:" << endl;
         BitBoard().print(all_white_pieces);
-        cout << "AB BB:" << endl;
+        cout << "All Black BB:" << endl;
         BitBoard().print(all_black_pieces);
-        cout << "Empty:" << endl;
+        cout << "Empty squares:" << endl;
         BitBoard().print(empty_squares);
     }
 
