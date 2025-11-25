@@ -1,6 +1,7 @@
 
 #include<iostream>
 #include<vector>
+#include<array>
 #include<unordered_map>
 
 using namespace std;
@@ -68,7 +69,7 @@ class Board{
     unsigned long long all_white_pieces;
     unsigned long long empty_squares;
     bool is_white_turn;
-    vector<vector<bool>> casteling_rights;
+    vector<array<bool, 4>> casteling_rights;
     vector<int> ep_sq;
     int moves_counter;
     int halfmoves_counter;
@@ -138,7 +139,7 @@ class Board{
         for (int i=0; i<6; i++){
             int space_index = FEN.find(" ");
             string substr = FEN.substr(0, space_index);
-            data.push_back(substr);
+            data.emplace_back(substr);
             FEN = FEN.substr(space_index+1, FEN.length());
         }
         // load pieces
@@ -167,7 +168,7 @@ class Board{
         is_white_turn = (data[1]=="w") ? true : false;
         // casteling rights
         casteling_rights.clear();
-        vector<bool> rights = {false, false, false, false};
+        array<bool,4> rights = {false, false, false, false};
         unordered_map<char,int> char_to_int_rights = {{'K', 0}, {'Q', 1}, {'k', 2}, {'q', 3}};
         for (int c = 0; c<data[2].length(); c++){
             char curr_char = data[2][c];
@@ -175,13 +176,13 @@ class Board{
                 rights[char_to_int_rights[curr_char]] = true;
             }
         }
-        casteling_rights.push_back(rights);
+        casteling_rights.emplace_back(rights);
         // ep_sq
         if (data[3] != "-"){
-            ep_sq.push_back(algebraic_to_sq(data[3]));
+            ep_sq.emplace_back(algebraic_to_sq(data[3]));
         }
         else{
-            ep_sq.push_back(-1);
+            ep_sq.emplace_back(-1);
         }
         // move_counters
         char mc = data[5][0];
@@ -262,11 +263,21 @@ class Board{
         // ep square logic
         if (m.is_double_pawn_move){
             int d = (m.end-m.start < 0) ? -8 : 8;
-            ep_sq.push_back(m.end+d);
+            ep_sq.emplace_back(m.end+d);
         }
         else{
-            ep_sq.push_back(-1);
+            ep_sq.emplace_back(-1);
         }
+    }
+
+
+    vector<Move> get_moves(){
+        vector<Move> moves;
+        //check king move restirctions pinned pieces etc.
+
+        // check normal moves
+
+        return moves;
     }
 
 };
@@ -280,5 +291,9 @@ int main(){
     // b.make_move(Move(0, 16));
     // b.print();
     // b.print_bitboards();
+
+    
+    
+
     return 0;
 }
