@@ -144,7 +144,7 @@ class Board{
         unsigned long long one = 1;
         bitboards[p] |= (one<<sq);
         // update all_boards
-        empty_squares = ~((~empty_squares) | (one<<sq));
+        empty_squares = empty_squares & ~(one<<sq);
         if (p<6){
             all_white_pieces |= (one<<sq);
         }
@@ -160,10 +160,10 @@ class Board{
         // update the all_boards
         empty_squares |= one<<sq;
         if (p<6){
-            all_white_pieces = ~((~all_white_pieces) | (one<<sq));
+            all_white_pieces = all_white_pieces & ~(one<<sq);
         }
         else{
-            all_black_pieces = ~((~all_black_pieces) | (one<<sq));
+            all_black_pieces = all_black_pieces & ~(one<<sq);
         }
     }
 
@@ -341,15 +341,15 @@ int main(){
     Board b = Board();
     // b.print_bitboards();
     b.print();
-    // b.make_move(Move(0, 16));
-    // b.print();
-    // b.print_bitboards();
+    b.make_move(Move(0, 16));
+    b.print();
+    b.print_bitboards();
 
-    vector<Move> moves = b.get_moves();
-    for (Move m : moves){
-        m.print();
-        cout << endl;
-    }
+    // vector<Move> moves = b.get_moves();
+    // for (Move m : moves){
+    //     m.print();
+    //     cout << endl;
+    // }
 
     
     
