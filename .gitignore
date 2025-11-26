@@ -11,3 +11,5 @@ __pycache__/
 *.exe
 
 *.rs
+
+cpp_engine/engine_class

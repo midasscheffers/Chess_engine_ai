@@ -1,5 +1,6 @@
 
 #include<iostream>
+#include<climits>
 #include<vector>
 #include<array>
 #include<unordered_map>
@@ -14,7 +15,19 @@ int algebraic_to_sq(string alg_sq){
     return x+8*(8-y);
 }
 
+string sq_to_algebraic(int sq){
+    char x = sq%8 + 'a';
+    char y = (8-sq/8) + '0';
+    string xy = string{x} + string{y};
+    return xy;
+}
 
+bool on_board(int x,int y){
+    if (x<0 || x>7 || y<0 || y>7){
+        return false;
+    }
+    return true;
+}
 
 
 struct Move{
@@ -30,6 +43,10 @@ struct Move{
     Move(int s, int e){
         start = s;
         end = e;
+    }
+
+    void print(){
+        cout << sq_to_algebraic(start) << sq_to_algebraic(end);
     }
 };
 
@@ -59,6 +76,33 @@ struct BitBoard{
 };
 
 
+struct PreComputedData{
+    vector<vector<Move>> knight_moves_on_sq;
+    vector<array<vector<Move>, 8>> sliding_moves_on_sq;
+    PreComputedData(){
+        knight_moves_on_sq.reserve(64);
+        for (int i = 0; i<64; i++){
+            int x = i%8;
+            int y = i/8;
+            // cout << "Precomputing knight moves on: "<< x << ", " << y << endl;
+            array<pair<int,int>, 8> possible = {{{-1, -2}, {1,-2}, {-2, -1}, {2,-1}, {-2,1}, {2,1}, {-1,2}, {1,2}}}; //{-1, -2}, {1,-2}, {-2, -1}, {2,-1}, {-2,1}, {2,1}, {-1,2}, {1,2}
+            for (int j = 0; j<8; j++){
+                int dx = possible[j].first;
+                int dy = possible[j].second;
+                // cout << dx << ", " << dy << endl;
+                if (on_board(x+dx, y+dy)){
+                    // cout << "Added: " << x+dx << ", " << y+dy << endl;
+                    Move m = Move(i, (x+dx+8*(y+dy)));
+                    knight_moves_on_sq[i].emplace_back(m);
+                }
+            }
+        }
+        sliding_moves_on_sq.reserve(64);
+    }
+};
+
+
+
 
 
 class Board{
@@ -85,12 +129,14 @@ class Board{
         {6, 'k'}, {7, 'p'}, {8, 'n'}, {9, 'b'}, {10, 'r'}, {11, 'q'}, 
         {-1, '.'}
     };
+    PreComputedData predata;
 
 
 
 
     Board(){
         LoadFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        // predata = PreComputedData();
     }
 
 
@@ -276,11 +322,18 @@ class Board{
         //check king move restirctions pinned pieces etc.
 
         // check normal moves
+        for (int i = 0; i<64; i++){
+            for (Move m : predata.knight_moves_on_sq[i]){
+                moves.emplace_back(m);
+            }
+        }
 
         return moves;
     }
 
 };
+
+
 
 
 
@@ -291,6 +344,12 @@ int main(){
     // b.make_move(Move(0, 16));
     // b.print();
     // b.print_bitboards();
+
+    vector<Move> moves = b.get_moves();
+    for (Move m : moves){
+        m.print();
+        cout << endl;
+    }
 
     
     
